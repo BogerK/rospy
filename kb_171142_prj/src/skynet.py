@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import rospy
 import math
 from sensor_msgs.msg import LaserScan
@@ -23,11 +25,21 @@ class T1000:
     def get_goals(self,PointArray_msg):
         self.goal = PointArray_msg.goals # accesses the goals from goal_publisher msg
 
+    def e_dist(self): #euclidean distance between pos of a robot and goal point
+
+            return dist
+
+    def reach_goals(self):
+        var2 = Twist()
+        while True:
+            var3.linear.x = 0.3
+            var3.angular.z = 0.0
+            self.vel_pub.publish(var2)
 
 #make and run the main function
 if __name__ == '__main__':
     try:
-        var = T1000()
-        var.reach_goals()
+        var1 = T1000()
+        var1.reach_goals()
     except rospy.ROSInterruptException:
-        rospy.sleep()
+        pass
