@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="kb_171142_prj" type="skynet.py" name="skynet"  output="screen">
+  </node>
+</launch>
