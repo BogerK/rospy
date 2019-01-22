@@ -25,7 +25,7 @@ class T1000:
 
         #print ('position X is: ' +str(self.cur_position[0]))
         #print ('position Y is: ' +str(self.cur_position[1]))
-        print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
+        #print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
 
     def get_goals(self, PointArray): #get the coordinates of the goals and store them in the array
         run_once = 0
@@ -42,57 +42,69 @@ class T1000:
         return sqrt(pow((g_pos_x - self.cur_position[0]), 2) + pow((g_pos_y - self.cur_position[1]), 2))
 
     def robot_angle(self, g_pos_x, g_pos_y): #angle between X-axis, robot,  goal
-        return round(atan2(g_pos_y - self.cur_position[1], g_pos_x - self.cur_position[0]), 3)
+        return atan2(g_pos_y - self.cur_position[1], g_pos_x - self.cur_position[0])
 
     def m_line1_angle(self, dest_x, dest_y, orig_x, orig_y): #angle between X-axis, point of origin, goal
-        return round(atan2(self.goals[0].y - 0, self.goals[0].x - 0), 3)
-
-    #def deflection(self, )
+        return atan2(dest_y - orig_y, dest_x - orig_x)
 
     def reach_goals(self):
         time.sleep(1)
         speed = Twist()
+        flag = 0
         while not rospy.is_shutdown():
             #rate=rospy.Rate(10)
-            self.e_dist(self.goals[0].x, self.goals[0].y)
-            self.robot_angle(self.goals[0].x, self.goals[0].y)
-            self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)
-
-            m_factor = self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0) - self.robot_angle(self.goals[0].x, self.goals[0].y)
-            #print('difference is: ' +str(m_factor))
-            #print('current z is: ' +str(self.cur_position[2]))
-
-            if m_factor <-0.02 or m_factor >0.02: #point and move towards the m-line
-                if m_factor <-0.02 and 0<self.cur_position[2]<=3.12:
-                    speed.linear.x = 0
-                    speed.angular.z = 0.4
-                elif m_factor <-0.02 and -3.12<=self.cur_position[2]<=0:
-                    speed.linear.x = 0
-                    speed.angular.z = -0.4
-                elif m_factor >0.02 and 0.02<=self.cur_position[2]<=pi:
-                    speed.linear.x = 0
-                    speed.angular.z = -0.4
-                elif m_factor >0.02 and -pi<=self.cur_position[2]<=-0.02:
-                    speed.linear.x = 0
-                    speed.angular.z = 0.4
-                else:
-                    speed.linear.x = 0.1
-                    speed.angular.z = 0.0
+            if self.e_dist(self.goals[flag].x, self.goals[flag].y)<0.1:
+                print('goal '+str(flag+1) +' is reached')
+                flag = flag + 1
             else:
-                ang_dif = round(self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0), 3) - round(self.cur_position[2], 3)
-                if -0.05<ang_dif<0.05:
-                    speed.linear.x = 0.3
-                    speed.angular.z = 0.0
-                elif ang_dif>0.05:
-                    speed.linear.x = 0.0
-                    speed.angular.z = 0.2
-                    time.sleep(0.5)
-                elif ang_dif<-0.05:
-                    speed.linear.x = 0.0
-                    speed.angular.z = -0.2
-                    time.sleep(0.5)
+                self.robot_angle(self.goals[flag].x, self.goals[flag].y)
+                if flag == 0:
+                    self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)
+                    m_factor = self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0) - self.robot_angle(self.goals[0].x, self.goals[0].y)
+                else:
+                    self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y )
+                    m_factor = self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y) - self.robot_angle(self.goals[flag].x, self.goals[flag].y)
+                #print('difference is: ' +str(m_factor))
+                #print('current z is: ' +str(self.cur_position[2]))
+
+                if m_factor < -0.01 or m_factor > 0.01: #point and move towards the m-line
+                    if m_factor < -0.01 and 0 < self.cur_position[2] <= 3.12:
+                        speed.linear.x = 0.0
+                        speed.angular.z = 0.2
+                    elif m_factor < -0.01 and -3.12 <= self.cur_position[2] <= 0:
+                        speed.linear.x = 0.0
+                        speed.angular.z = -0.2
+                    elif m_factor > 0.01 and 0.02 <= self.cur_position[2] <= pi:
+                        speed.linear.x = 0.0
+                        speed.angular.z = -0.2
+                    elif m_factor > 0.01 and -pi <= self.cur_position[2] <= -0.02:
+                        speed.linear.x = 0.0
+                        speed.angular.z = 0.2
+                    else:
+                        speed.linear.x = 0.1
+                        speed.angular.z = 0.0
+                else:
+                    if flag == 0:
+                        ang_dif = self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0) - self.cur_position[2]
+                    else:
+                        ang_dif = self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y) - self.cur_position[2]
+                    if -0.03 < ang_dif < 0.03:
+                        speed.linear.x = 0.2
+                        speed.angular.z = 0.0
+                    elif 0.03 < ang_dif < 0.5:
+                        speed.linear.x = 0.2
+                        speed.angular.z = 0.2
+                    elif ang_dif >= 0.5:
+                        speed.linear.x = 0.0
+                        speed.angular.z = 0.2
+                    elif -0.5 < ang_dif < -0.03:
+                        speed.linear.x = 0.2
+                        speed.angular.z = -0.2
+                    elif ang_dif <= -0.5:
+                        speed.linear.x = 0.0
+                        speed.angular.z = -0.2
             self.vel_pub.publish(speed)
-            #print('the distance is ' +str(self.e_dist(self.goals[0].x, self.goals[0].y)))
+            #print('the distance is ' +str(self.e_dist(self.goals[flag].x, self.goals[flag].y)))
             #print('angle (robot to goal1) is ' +str(self.robot_angle(self.goals[0].x, self.goals[0].y)))
             #print('angle (origin to goal1) is ' +str(self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)))
 
