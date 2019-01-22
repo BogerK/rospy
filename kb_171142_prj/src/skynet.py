@@ -25,7 +25,7 @@ class T1000:
 
         #print ('position X is: ' +str(self.cur_position[0]))
         #print ('position Y is: ' +str(self.cur_position[1]))
-        #print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
+        print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
 
     def get_goals(self, PointArray): #get the coordinates of the goals and store them in the array
         run_once = 0
@@ -57,31 +57,41 @@ class T1000:
             self.e_dist(self.goals[0].x, self.goals[0].y)
             self.robot_angle(self.goals[0].x, self.goals[0].y)
             self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)
-            var = self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0) - self.robot_angle(self.goals[0].x, self.goals[0].y)
-            print('difference is: ' +str(var))
-            print('current z is: ' +str(self.cur_position[2]))
 
-            if var <-0.01 and 0.02<=self.cur_position[2]<=3.12:
-                speed.linear.x = 0
-                speed.angular.z = 0.4
-                #self.vel_pub.publish(speed)
-            elif var <0.01 and -3.12<=self.cur_position[2]<=-0.02:
-                speed.linear.x = 0
-                speed.angular.z = -0.4
-                #self.vel_pub.publish(speed)
-            elif var >0.01 and 0.02<=self.cur_position[2]<=3.12:
-                speed.linear.x = 0
-                speed.angular.z = -0.4
-                #self.vel_pub.publish(speed)
-            elif var >0.01 and -3.12<=self.cur_position[2]<=-0.02:
-                speed.linear.x = 0
-                speed.angular.z = 0.4
-                #self.vel_pub.publish(speed)
+            m_factor = self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0) - self.robot_angle(self.goals[0].x, self.goals[0].y)
+            #print('difference is: ' +str(m_factor))
+            #print('current z is: ' +str(self.cur_position[2]))
+
+            if m_factor <-0.02 or m_factor >0.02: #point and move towards the m-line
+                if m_factor <-0.02 and 0<self.cur_position[2]<=3.12:
+                    speed.linear.x = 0
+                    speed.angular.z = 0.4
+                elif m_factor <-0.02 and -3.12<=self.cur_position[2]<=0:
+                    speed.linear.x = 0
+                    speed.angular.z = -0.4
+                elif m_factor >0.02 and 0.02<=self.cur_position[2]<=pi:
+                    speed.linear.x = 0
+                    speed.angular.z = -0.4
+                elif m_factor >0.02 and -pi<=self.cur_position[2]<=-0.02:
+                    speed.linear.x = 0
+                    speed.angular.z = 0.4
+                else:
+                    speed.linear.x = 0.1
+                    speed.angular.z = 0.0
             else:
-                speed.linear.x = 0
-                speed.angular.z = 0.0
+                ang_dif = round(self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0), 3) - round(self.cur_position[2], 3)
+                if -0.05<ang_dif<0.05:
+                    speed.linear.x = 0.3
+                    speed.angular.z = 0.0
+                elif ang_dif>0.05:
+                    speed.linear.x = 0.0
+                    speed.angular.z = 0.2
+                    time.sleep(0.5)
+                elif ang_dif<-0.05:
+                    speed.linear.x = 0.0
+                    speed.angular.z = -0.2
+                    time.sleep(0.5)
             self.vel_pub.publish(speed)
-
             #print('the distance is ' +str(self.e_dist(self.goals[0].x, self.goals[0].y)))
             #print('angle (robot to goal1) is ' +str(self.robot_angle(self.goals[0].x, self.goals[0].y)))
             #print('angle (origin to goal1) is ' +str(self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)))
