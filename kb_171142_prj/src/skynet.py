@@ -211,7 +211,7 @@ class T1000:
 #make and run the main function
 if __name__ == '__main__':
     try:
-        var1 = T1000()
-        var1.reach_goals()
+        var1 = T1000() #instance of a class
+        var1.reach_goals() #run main function
     except rospy.ROSInterruptException:
         pass
