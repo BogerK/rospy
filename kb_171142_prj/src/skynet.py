@@ -48,14 +48,15 @@ class T1000:
     def m_line1_angle(self, dest_x, dest_y, orig_x, orig_y): #angle between X-axis, point of origin, goal
         return atan2(dest_y - orig_y, dest_x - orig_x)
 
-    def reach_goals(self):
-        time.sleep(2)
-        speed = Twist()
-        flag = 0
+    def reach_goals(self): #scenario run
+        print('\n' +'\n' +'I need your clothes, your boots and your motorcycle' +'\n' +'\n')
+        time.sleep(2) #making short break so are callbacks are charging up
+        speed = Twist() # instance of a twist
+        flag = 0 # counter of goals
         while not rospy.is_shutdown():
             rate=rospy.Rate(10)
             if self.e_dist(self.goals[flag].x, self.goals[flag].y)<0.1:
-                print('goal '+str(flag+1) +' is reached')
+                print('\n' +'\n''goal '+str(flag+1) +' is reached' +'\n' +'\n')
                 flag = flag + 1
                 if flag == 3:
                     speed.linear.x = 0.0
@@ -66,48 +67,99 @@ class T1000:
             else:
                 self.robot_angle(self.goals[flag].x, self.goals[flag].y)
                 if flag == 0:
-                    self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)
-                    if self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)<0:
-                        self.arg = -1
+                    arg_line1_angle = self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0)
+
+                    if pi/4 < arg_line1_angle < 3*pi/4 or -3*pi/4 < arg_line1_angle < -pi/4:
+                        self.arg_search = 666
                     else:
-                        self.arg = 1
+                        self.arg_search = -666
+
+                    if pi/2 <= arg_line1_angle <=pi or -pi <= arg_line1_angle <= -pi/2:
+                        self.arg2_speed = 1
+                    else:
+                        self.arg2_speed = -1
+
+                    if arg_line1_angle <= 0:
+                        self.arg1_speed = -1
+                    else:
+                        self.arg1_speed = 1
+
                     m_factor = round(self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0, 0) - self.robot_angle(self.goals[0].x, self.goals[0].y), 4)
                     ang_dif = round(self.m_line1_angle(self.goals[0].x, self.goals[0].y, 0,0) - self.cur_position[2], 4)
                 else:
-                    self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y )
-                    if self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y )<0:
-                        self.arg = -1
+                    arg_line1_angle = self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y )
+
+                    if pi/4 < arg_line1_angle < 3*pi/4 or -3*pi/4 < arg_line1_angle < -pi/4:
+                        self.arg_search = 666
                     else:
-                        self.arg = 1
+                        self.arg_search = -666
+
+                    if pi/2 <= arg_line1_angle <=pi or -pi <= arg_line1_angle <= -pi/2:
+                        self.arg2_speed = 1
+                    else:
+                        self.arg2_speed = -1
+
+                    if arg_line1_angle < 0:
+                        self.arg1_speed = -1
+                    else:
+                        self.arg1_speed = 1
                     m_factor = round(self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y) - self.robot_angle(self.goals[flag].x, self.goals[flag].y), 4)
                     ang_dif = round(self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x, self.goals[flag-1].y) - self.cur_position[2], 4)
-                print('difference is: ' +str(m_factor))
-                #print('current z is: ' +str(self.cur_position[2]))
 
                 if m_factor < -0.04 or m_factor > 0.04: #point and move towards the m-line
-                    if m_factor < -0.04 and 0.1< self.cur_position[2] <= 3:
-                        speed.linear.x = -round(0.01/m_factor, 4)
-                        speed.angular.z = 0.3*self.arg
-                    elif m_factor < -0.04 and -3 <= self.cur_position[2] <= -0.1:
-                        speed.linear.x = -round(0.01/m_factor, 4)
-                        speed.angular.z = -0.3*self.arg
-                    elif m_factor > 0.04 and 0.1 <= self.cur_position[2] <= 3:
-                        speed.linear.x = round(0.01/m_factor, 4)
-                        speed.angular.z = -0.3*self.arg
-                    elif m_factor > 0.04 and -3<= self.cur_position[2] <= -0.1:
-                        speed.linear.x = round(0.01/m_factor, 4)
-                        speed.angular.z = 0.3*self.arg
-                    else:
-                        if 0 < self.cur_position[2] < pi/2 or -0 > self.cur_position[2] > -pi/2:
-                            speed.linear.x = 0.2
-                            speed.angular.z = -self.cur_position[2]
-                        elif pi > self.cur_position[2] > pi/2:
-                            speed.linear.x = 0.2
-                            speed.angular.z = pi - self.cur_position[2]
-                        elif -pi < self.cur_position[2] < -pi/2:
-                            speed.linear.x = 0.2
-                            speed.angular.z = -pi - self.cur_position[2]
-                else:
+                    if self.arg_search == 666:
+                        if m_factor < -0.04 and 0 <= self.cur_position[2] <= 3.1:
+                            speed.linear.x = -round(0.008/m_factor, 4)
+                            speed.angular.z = 0.3*self.arg1_speed
+                        elif m_factor < -0.04 and -3.1 <= self.cur_position[2] <= -0:
+                            speed.linear.x = -round(0.008/m_factor, 4)
+                            speed.angular.z = -0.3*self.arg1_speed
+                        elif m_factor > 0.04 and 0.1 <= self.cur_position[2] <= pi:
+                            speed.linear.x = round(0.008/m_factor, 4)
+                            speed.angular.z = -0.3*self.arg1_speed
+                        elif m_factor > 0.04 and -pi <= self.cur_position[2] <= -0.1:
+                            speed.linear.x = round(0.008/m_factor, 4)
+                            speed.angular.z = 0.3*self.arg1_speed
+                        else:
+                            if 0 < self.cur_position[2] < pi/2 or -0 > self.cur_position[2] > -pi/2:
+                                speed.linear.x = 0.2
+                                speed.angular.z = -self.cur_position[2]
+                            elif pi > self.cur_position[2] > pi/2:
+                                speed.linear.x = 0.2
+                                speed.angular.z = pi - self.cur_position[2]
+                            elif -pi < self.cur_position[2] < -pi/2:
+                                speed.linear.x = 0.2
+                                speed.angular.z = -pi - self.cur_position[2]
+                    elif self.arg_search == -666:
+                        if m_factor < -0.04:
+                            if pi/2 <= self.cur_position[2] <= pi or -pi <= self.cur_position[2] <= -1.61:
+                                speed.linear.x = -round(0.008/m_factor, 4)
+                                speed.angular.z = 0.3*self.arg2_speed
+                            elif  0 <= self.cur_position[2] <= pi/2 or -1.53 <= self.cur_position[2] <= -0:
+                                speed.linear.x = -round(0.008/m_factor, 4)
+                                speed.angular.z = -0.3*self.arg2_speed
+                            else:
+                                if  0 < self.cur_position[2] < pi:
+                                    speed.linear.x = 0.2
+                                    speed.angular.z = pi/2 - self.cur_position[2]
+                                elif  -pi < self.cur_position[2] < 0:
+                                    speed.linear.x = 0.2
+                                    speed.angular.z = -pi/2 - self.cur_position[2]
+                        elif m_factor > 0.04:
+                            if 1.61 <= self.cur_position[2]<= pi or -pi <= self.cur_position[2] <= -pi/2:
+                                speed.linear.x = round(0.008/m_factor, 4)
+                                speed.angular.z = -0.3*self.arg2_speed
+                            elif 0 <= self.cur_position[2] <= 1.53 or -pi/2 <= self.cur_position[2] <= -0:
+                                speed.linear.x = round(0.008/m_factor, 4)
+                                speed.angular.z = 0.3*self.arg2_speed
+                            else:
+                                if  0 < self.cur_position[2] < pi:
+                                    speed.linear.x = 0.2
+                                    speed.angular.z = pi/2 - self.cur_position[2]
+                                elif  -pi < self.cur_position[2] < 0:
+                                    speed.linear.x = 0.2
+                                    speed.angular.z = -pi/2 - self.cur_position[2]
+                else: #move along the m-line
                     if -0.03 < ang_dif < 0.03:
                         speed.linear.x = 0.3
                         speed.angular.z = -m_factor
@@ -116,9 +168,11 @@ class T1000:
                         speed.angular.z = 2*ang_dif
 
             self.vel_pub.publish(speed)
-            print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
-            print('speed y ' +str(speed.angular.z))
-            print('speed x ' +str(speed.linear.x))
+            #print ('test ' +str(self.arg_search))
+            #print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
+            #print( '\n' +'speed linear ' +str(speed.angular.x) +'m/s')
+            #print( '\n' +'speed angular ' +str(speed.linear.z) +'m/s')
+            #print('difference is: ' +str(m_factor))
             #print('angle (robot to m_line) ' +str(ang_dif))
             #print('the distance is ' +str(self.e_dist(self.goals[flag].x, self.goals[flag].y)))
             #print('angle (robot to goal1) is ' +str(self.robot_angle(self.goals[flag].x, self.goals[flag].y)))
