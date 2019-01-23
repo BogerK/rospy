@@ -76,7 +76,7 @@ class T1000:
                         speed.angular.z = -0.3
                     else:
                         speed.linear.x = 0.25
-                        speed.angular.z = 0.1
+                        speed.angular.z = 0.05
 
                 elif self.left_beams_number < self.right_beams_number:
                     if self.rightfront > 72:
@@ -84,7 +84,7 @@ class T1000:
                         speed.angular.z = 0.3
                     else:
                         speed.linear.x = 0.25
-                        speed.angular.z = -0.1
+                        speed.angular.z = -0.05
 
             elif self.leftfront == 0 or self.rightfront ==0:
                 if self.e_dist(self.goals[flag].x, self.goals[flag].y)<0.3:
