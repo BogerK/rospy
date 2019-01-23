@@ -25,16 +25,9 @@ class T1000:
         quaternion = [data.pose[1].orientation.x, data.pose[1].orientation.y, data.pose[1].orientation.z, data.pose[1].orientation.w]
         self.cur_position = [(data.pose[1].position.x), ( data.pose[1].position.y), euler_from_quaternion(quaternion)[2]]
 
-        #print ('position X is: ' +str(self.cur_position[0]))
-        #print ('position Y is: ' +str(self.cur_position[1]))
-        #print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
 
     def get_goals(self, PointArray): #get the coordinates of the goals and store them in the array
         self.goals = PointArray.goals
-
-        #print('goal 1 = ' + str(self.goals[0].x) + ', ' + str(self.goals[0].y))
-        #print('goal 2 = ' + str(self.goals[1].x) + ', ' + str(self.goals[1].y))
-        #print('goal 3 = ' + str(self.goals[2].x) + ', ' + str(self.goals[2].y) +'\n')
 
     def get_laser(self, LaserScan): #read the
         self.laser_data = LaserScan.ranges
@@ -57,10 +50,6 @@ class T1000:
         for l in self.laser_data[270:360]:
             if l < 0.9:
                 self.right_beams_number +=1
-        #print('left index ' +str(self.leftfront))
-        #print('right index ' +str(self.rightfront))
-        #print('left number of beams ' +str(self.left_beams_number))
-        #print('right number of beams ' +str(self.right_beams_number))
 
     def e_dist(self, g_pos_x, g_pos_y): #calculates the euclidian distace between the robot and the goal point
         return sqrt(pow((g_pos_x - self.cur_position[0]), 2) + pow((g_pos_y - self.cur_position[1]), 2))
@@ -73,34 +62,35 @@ class T1000:
 
     def reach_goals(self): #scenario run
         print('\n' +'\n' +'I need your clothes, your boots and your motorcycle' +'\n' +'\n')
-        time.sleep(2) #making short break so are callbacks are charging up
+        count = 0
+        while count <1:
+            time.sleep(2) #making short break so are callbacks are charging up
+            count = count + 1
         speed = Twist() # instance of a twist
         flag = 0 # counter of goals
-        timer = time.time() + 1
         while not rospy.is_shutdown():
-            #rate=rospy.Rate(10)
-            if self.leftfront !=0 or self.rightfront !=0:
+            if self.leftfront !=0 or self.rightfront !=0: #simple algorithm for wall following
                 if self.left_beams_number > self.right_beams_number:
                     if self.leftfront < 22:
-                        speed.linear.x = 0.1
+                        speed.linear.x = 0.15
                         speed.angular.z = -0.3
                     else:
                         speed.linear.x = 0.3
-                        speed.angular.z = 0.05
+                        speed.angular.z = 0.15
 
                 elif self.left_beams_number < self.right_beams_number:
                     if self.rightfront > 72:
-                        speed.linear.x = 0.1
+                        speed.linear.x = 0.15
                         speed.angular.z = 0.3
                     else:
                         speed.linear.x = 0.3
-                        speed.angular.z = -0.05
+                        speed.angular.z = -0.15
 
             elif self.leftfront == 0 or self.rightfront ==0:
-                if self.e_dist(self.goals[flag].x, self.goals[flag].y)<0.1:
+                if self.e_dist(self.goals[flag].x, self.goals[flag].y)<0.3:
                     print('\n' +'\n''goal '+str(flag+1) +' is reached' +'\n' +'\n')
                     flag = flag + 1
-                    if flag == 3:
+                    if flag == 3: #all goals are reached
                         speed.linear.x = 0.0
                         speed.angular.z = 0.0
                         self.vel_pub.publish(speed)
@@ -150,21 +140,19 @@ class T1000:
 
                     if m_factor < -0.04 or m_factor > 0.04: #point and move towards the m-line
                         if self.arg_search == 666:
-
                             if m_factor < -0.04 and 0 <= self.cur_position[2] <= 3.1:
-                                print('here1')
                                 speed.linear.x = -round(0.008/m_factor, 4)
                                 speed.angular.z = 0.3*self.arg1_speed
                             elif m_factor < -0.04 and -3.1 <= self.cur_position[2] <= 0:
-                                print('here2')
+
                                 speed.linear.x = -round(0.008/m_factor, 4)
                                 speed.angular.z = -0.3*self.arg1_speed
                             elif m_factor > 0.04 and 0.1 <= self.cur_position[2] <= pi:
-                                print('here3')
+
                                 speed.linear.x = round(0.008/m_factor, 4)
                                 speed.angular.z = -0.3*self.arg1_speed
                             elif m_factor > 0.04 and -pi <= self.cur_position[2] <= -0.1:
-                                print('here4')
+
                                 speed.linear.x = round(0.008/m_factor, 4)
                                 speed.angular.z = 0.3*self.arg1_speed
                             else:
@@ -216,15 +204,7 @@ class T1000:
 
 
             self.vel_pub.publish(speed)
-            #print ('test ' +str(self.arg_search))
-            #print ('angle    Z is: ' +str(self.cur_position[2]) +'\n')
-            #print('difference is: ' +str(m_factor))
-            #print('angle (robot to m_line) ' +str(ang_dif))
-            #print('the distance is ' +str(self.e_dist(self.goals[flag].x, self.goals[flag].y)))
-            #print('angle (robot to goal1) is ' +str(self.robot_angle(self.goals[flag].x, self.goals[flag].y)))
-            #print('angle (origin to goal1) is ' +str(self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, 0,0)))
-            #print('angle (origin to goal1) is ' +str(self.m_line1_angle(self.goals[flag].x, self.goals[flag].y, self.goals[flag-1].x,self.goals[flag-1].y)))
-            #rate.sleep()
+
 
         self.rate.sleep()
 
