@@ -29,7 +29,7 @@ class T1000:
     def get_goals(self, PointArray): #get the coordinates of the goals and store them in the array
         self.goals = PointArray.goals
 
-    def get_laser(self, LaserScan): #read the
+    def get_laser(self, LaserScan): #read the laser data
         self.laser_data = LaserScan.ranges
         self.leftfront = 0
         self.rightfront = 0
