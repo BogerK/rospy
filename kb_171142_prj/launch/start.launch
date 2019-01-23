@@ -1,4 +1,6 @@
 <launch>
+  <include file="$(find goal_publisher)/launch/goal_publisher.launch"/>
+  <include file="$(find dist_tracker)/launch/dist_tracker.launch"/>
   <node pkg="kb_171142_prj" type="skynet.py" name="skynet"  output="screen">
   </node>
 </launch>
