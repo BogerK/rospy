@@ -47,15 +47,15 @@ First angle is angle between x-axis, point of origin, first goal.
 Second angle is the angle between x-axis, Turtlebot, first goal.
 Then I compare those angles and if second angle is bigger than first – bot has to turn towards the north and go until the angles are same. This is how the shortest distance line is reached.
 
-<img src="images/Angle_difference.png" width="200" height="200" />
+<img src="images/Angle_difference.png" width="300" height="300" />
 
 Next step is to turn the bot towards the first goal and go in that direction keeping those two angles same.
 Repeat 3 times.
 
-<img src="images/Moving_along_the_line.png" width="200" height="200" />
+<img src="images/Moving_along_the_line.png" width="300" height="300" />
 
 If an obstacle is on its way, then turns on an “obstacle avoidance mode”.
 By avoiding I mean just turn right if the obstacles are on the front left side quarter of the bot and left if the obstacles are on the front right side quarter.
 
-<img src="images/avoiding_obstacle_left.png" width="200" height="200" />
-<img src="images/avoiding_obstacle_right.png" width="200" height="200" />
+<img src="images/avoiding_obstacle_left.png" width="300" height="300" />
+<img src="images/avoiding_obstacle_right.png" width="300" height="300" />
