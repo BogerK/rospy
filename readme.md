@@ -29,7 +29,7 @@ This subscriber is used in order to get position of the bot with respect to the 
 
  **- /scan**
  This subscriber is used to get the readings from laser sensors of the bot.
- 
+
  **- /cmd_vel**
 This publisher is used to provide speed commands to the bot.
 
@@ -46,10 +46,10 @@ Since we have all the coordinates from subscribers, I decided to use a trigonome
 First angle is angle between x-axis, point of origin, first goal.
 Second angle is the angle between x-axis, Turtlebot, first goal.
 Then I compare those angles and if second angle is bigger than first – bot has to turn towards the north and go until the angles are same. This is how the shortest distance line is reached.
-img.
+![angle difference](images/Angle_difference.png)
 Next step is to turn the bot towards the first goal and go in that direction keeping those two angles same.
 Repeat 3 times.
 img.
-If an obstacle is on its way, then turns on an “obstacle avoidance mode”. 
+If an obstacle is on its way, then turns on an “obstacle avoidance mode”.
 By avoiding I mean just turn right if the obstacles are on the front left side quarter of the bot and left if the obstacles are on the front right side quarter.
 img.
