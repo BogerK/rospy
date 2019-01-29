@@ -14,7 +14,7 @@ The Repository has to be cloned into the Catkin workspace.
  - Place obstacles:  
 `rosrun gazebo_ros spawn_model -file ~/catkin_ws/src/kb-171142_tier4/final_project_practice/model.sdf -sdf -x 2 -y 1 -model mini_project`
  - Run the scenario:  
-`roslaunch om_171160_prj start.launch`
+`roslaunch kb_171142_prj start.launch`
 ## General description:
 Goal of the project was to make Turtlebot go to the 3 points and avoid the obstacles on its way.
 Also there is a time condition. Bot must get to the last point within 5 minutes.
