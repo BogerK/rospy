@@ -10,7 +10,7 @@ The Repository has to be cloned into the Catkin workspace.
  - Start roscore in a Terminal by typing:
  `Roscore`
  - Start gazebo by typing in a new Terminal window:
-`roslaunch turtlebot3_gazebo turtlebot_empty_world.launch`
+`roslaunch turtlebot3_gazebo turtlebot3_empty_world.launch`
  - Place obstacles:
 `rosrun gazebo_ros spawn_model -file ~/catkin_ws/src/kb-171142_tier4/final_project_practice/model.sdf -sdf -x 2 -y 1 -model mini_project`
  - Run the scenario:
